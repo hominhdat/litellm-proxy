@@ -118,7 +118,7 @@ resource "aws_route" "private_nat_gateway" {
 }
 
 resource "aws_security_group" "default" {
-  vpc_id = vpc.litellm-proxy-vpc.id
+  vpc_id = aws_vpc.litellm-proxy-vpc.id
   name = "litellm-security-group"
   description = "Security group for litellm"
   ingress {

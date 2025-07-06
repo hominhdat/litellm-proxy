@@ -1,21 +1,20 @@
-resource "vpc" "default" {
+resource "aws_vpc" "litellm-proxy-vpc" {
   cidr_block = "10.0.0.0/16"
   enable_dns_support = true
   enable_dns_hostnames = true
   tags = {
     Name = "litellm-vpc"
-
-}
+  }
   lifecycle {
     create_before_destroy = true
   }
 }
 
 # create 3 private subnets and 3 public subnets in vpc
-resource "subnet" "private" {
+resource "aws_subnet" "private" {
   count = 3
-  vpc_id = vpc.default.id
-  cidr_block = cidrsubnet(vpc.default.cidr_block, 8, count.index + 1)
+  vpc_id = aws_vpc.litellm-proxy-vpc.id
+  cidr_block = cidrsubnet(aws_vpc.litellm-proxy-vpc.cidr_block, 8, count.index + 1)
   availability_zone = element(data.aws_availability_zones.available.names, count.index)
   map_public_ip_on_launch = false
   tags = {
@@ -26,10 +25,10 @@ resource "subnet" "private" {
   }
 }
 
-resource "subnet" "public" {
+resource "aws_subnet" "public" {
   count = 3
-  vpc_id = vpc.default.id
-  cidr_block = cidrsubnet(vpc.default.cidr_block, 8, count.index + 1)
+  vpc_id = aws_vpc.litellm-proxy-vpc.id
+  cidr_block = cidrsubnet(aws_vpc.litellm-proxy-vpc.cidr_block, 8, count.index + 1)
   availability_zone = element(data.aws_availability_zones.available.names, count.index)
   map_public_ip_on_launch = true
   tags = {
@@ -43,7 +42,7 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 resource "aws_internet_gateway" "default" {
-  vpc_id = vpc.default.id
+  vpc_id = aws_vpc.litellm-proxy-vpc.id
   tags = {
     Name = "litellm-internet-gateway"
   }
@@ -53,7 +52,7 @@ resource "aws_internet_gateway" "default" {
 }
 
 resource "aws_route_table" "public" {
-  vpc_id = vpc.default.id
+  vpc_id = aws_vpc.litellm-proxy-vpc.id
   tags = {
     Name = "litellm-public-route-table"
   }
@@ -75,7 +74,7 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_route_table" "private" {
-  vpc_id = vpc.default.id
+  vpc_id = aws_vpc.litellm-proxy-vpc.id
   tags = {
     Name = "litellm-private-route-table"
   }
@@ -85,14 +84,14 @@ resource "aws_route_table" "private" {
 }
 
 resource "aws_route_table_association" "private" {
-  count = length(subnet.private)
-  subnet_id = subnet.private[count.index].id
+  count = length(aws_subnet.private)
+  subnet_id = aws_subnet.private[count.index].id
   route_table_id = aws_route_table.private.id
 }
 
 resource "aws_nat_gateway" "default" {
   allocation_id = aws_eip.nat.id
-  subnet_id = subnet.public[0].id
+  subnet_id = aws_subnet.public[0].id
   tags = {
     Name = "litellm-nat-gateway"
   }
@@ -110,16 +109,16 @@ resource "aws_eip" "nat" {
   }
 }
 
-# route all private subnets to the NAT gateway
+# # route all private subnets to the NAT gateway
 resource "aws_route" "private_nat_gateway" {
-  count = length(subnet.private)
+  count = length(aws_subnet.private)
   route_table_id = aws_route_table.private.id
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id = aws_nat_gateway.default.id
 }
 
 resource "aws_security_group" "default" {
-  vpc_id = vpc.default.id
+  vpc_id = vpc.litellm-proxy-vpc.id
   name = "litellm-security-group"
   description = "Security group for litellm"
   ingress {

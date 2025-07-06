@@ -68,8 +68,8 @@ resource "aws_route" "public_internet_access" {
 }
 
 resource "aws_route_table_association" "public" {
-  count = length(subnet.public)
-  subnet_id = subnet.public[count.index].id
+  count = length(aws_subnet.public)
+  subnet_id = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
 }
 
@@ -100,7 +100,7 @@ resource "aws_nat_gateway" "default" {
   }
 }
 resource "aws_eip" "nat" {
-  vpc = true
+  
   tags = {
     Name = "litellm-nat-eip"
   }

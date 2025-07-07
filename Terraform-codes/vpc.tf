@@ -20,22 +20,16 @@ resource "aws_subnet" "private" {
   tags = {
     Name = "litellm-private-subnet-${count.index + 1}"
   }
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "aws_subnet" "public" {
   count = 3
   vpc_id = aws_vpc.litellm-proxy-vpc.id
-  cidr_block = cidrsubnet(aws_vpc.litellm-proxy-vpc.cidr_block, 8, count.index + 1)
+  cidr_block = cidrsubnet(aws_vpc.litellm-proxy-vpc.cidr_block, 8, count.index + 4)
   availability_zone = element(data.aws_availability_zones.available.names, count.index)
   map_public_ip_on_launch = true
   tags = {
     Name = "litellm-public-subnet-${count.index + 1}"
-  }
-  lifecycle {
-    create_before_destroy = true
   }
 }
 data "aws_availability_zones" "available" {
@@ -74,19 +68,17 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_route_table" "private" {
+  count = length(aws_subnet.private)
   vpc_id = aws_vpc.litellm-proxy-vpc.id
   tags = {
     Name = "litellm-private-route-table"
-  }
-  lifecycle {
-    create_before_destroy = true
   }
 }
 
 resource "aws_route_table_association" "private" {
   count = length(aws_subnet.private)
   subnet_id = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private.id
+  route_table_id = aws_route_table.private[count.index].id
 }
 
 resource "aws_nat_gateway" "default" {
@@ -112,43 +104,7 @@ resource "aws_eip" "nat" {
 # # route all private subnets to the NAT gateway
 resource "aws_route" "private_nat_gateway" {
   count = length(aws_subnet.private)
-  route_table_id = aws_route_table.private.id
+  route_table_id = aws_route_table.private[count.index].id
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id = aws_nat_gateway.default.id
-}
-
-resource "aws_security_group" "default" {
-  vpc_id = aws_vpc.litellm-proxy-vpc.id
-  name = "litellm-security-group"
-  description = "Security group for litellm"
-  ingress {
-    from_port = 22
-    to_port = 22
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port = 80
-    to_port = 80
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port = 443
-    to_port = 443
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  tags = {
-    Name = "litellm-security-group"
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
 }

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: litellm-config-file
+data:
+  config.yaml: |
+      model_list: 
+        - model_name: gpt-4o
+          litellm_params:
+            model: azure/gpt-4o-ca
+            api_base: https://litellm-test-instance.openai.azure.com/
+            api_key: os.environ/CA_AZURE_OPENAI_API_KEY
+      router_settings:
+        redis_host: litellm-proxy-redis-master.redis.svc.cluster.local
+        redis_password: REdis123
+        redis_port: 6379

@@ -223,35 +223,35 @@ resource "aws_iam_policy" "eks_worker_ebs" {
 
 resource "aws_iam_role_policy_attachment" "eks_worker_alb" {
   role       = aws_iam_role.eks_worker.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSALBIngressControllerPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
 resource "aws_iam_role_policy_attachment" "eks_worker_appmesh" {
   role       = aws_iam_role.eks_worker.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSAppMeshPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
 resource "aws_iam_role_policy_attachment" "eks_worker_s3" {
   role       = aws_iam_role.eks_worker.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSS3Policy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
 resource "aws_iam_role_policy_attachment" "eks_worker_kms" {
   role       = aws_iam_role.eks_worker.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSKMSPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
 resource "aws_iam_role_policy_attachment" "eks_worker_secrets" {
   role       = aws_iam_role.eks_worker.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSSecretsManagerPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
 resource "aws_iam_role_policy_attachment" "eks_worker_cloudwatch" {
   role       = aws_iam_role.eks_worker.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSCloudWatchPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
 resource "aws_iam_role_policy_attachment" "eks_worker_logs" {
   role       = aws_iam_role.eks_worker.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSLogsPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
 resource "aws_iam_role_policy_attachment" "eks_worker_metrics" {
   role       = aws_iam_role.eks_worker.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSMetricsPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
 
 ## EKS Add-ons

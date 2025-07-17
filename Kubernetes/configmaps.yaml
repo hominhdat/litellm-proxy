@@ -11,6 +11,6 @@ data:
             api_base: https://litellm-test-instance.openai.azure.com/
             api_key: os.environ/CA_AZURE_OPENAI_API_KEY
       router_settings:
-        redis_host: <your redis host>
-        redis_password: <your redis password>
+        redis_host: redis-host
+        redis_password: redis-password
         redis_port: 1992

@@ -1,0 +1,54 @@
+$ helm upgrade --install litellm-proxy-prometheus bitnami/kube-prometheus -f prometheus-values.yaml -n prometheus --create-namespace
+Release "litellm-proxy-prometheus" does not exist. Installing it now.
+NAME: litellm-proxy-prometheus
+LAST DEPLOYED: Thu Jul 17 20:56:53 2025
+NAMESPACE: prometheus
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CHART NAME: kube-prometheus
+CHART VERSION: 11.2.13
+APP VERSION: 0.84.0
+
+Did you know there are enterprise versions of the Bitnami catalog? For enhanced secure software supply chain features, unlimited pulls from Docker, LTS support, or application customization, see Bitnami Premium or Tanzu Application Catalog. See https://www.arrow.com/globalecs/na/vendors/bitnami for more information.
+
+** Please be patient while the chart is being deployed **
+
+Watch the Prometheus Operator Deployment status using the command:
+
+    kubectl get deploy -w --namespace prometheus -l app.kubernetes.io/name=kube-prometheus-operator,app.kubernetes.io/instance=litellm-proxy-prometheus
+
+Watch the Prometheus StatefulSet status using the command:
+
+    kubectl get sts -w --namespace prometheus -l app.kubernetes.io/name=kube-prometheus-prometheus,app.kubernetes.io/instance=litellm-proxy-prometheus
+
+Prometheus can be accessed via port "9090" on the following DNS name from within your cluster:
+
+    litellm-proxy-prometheus-k-prometheus.prometheus.svc.cluster.local
+
+To access Prometheus from outside the cluster execute the following commands:
+
+    echo "Prometheus URL: http://127.0.0.1:9090/"
+    kubectl port-forward --namespace prometheus svc/litellm-proxy-prometheus-k-prometheus 9090:9090
+
+Watch the Alertmanager StatefulSet status using the command:
+
+    kubectl get sts -w --namespace prometheus -l app.kubernetes.io/name=kube-prometheus-alertmanager,app.kubernetes.io/instance=litellm-proxy-prometheus
+
+Alertmanager can be accessed via port "9093" on the following DNS name from within your cluster:
+
+    litellm-proxy-prometheus-k-alertmanager.prometheus.svc.cluster.local
+
+To access Alertmanager from outside the cluster execute the following commands:
+
+    echo "Alertmanager URL: http://127.0.0.1:9093/"
+    kubectl port-forward --namespace prometheus svc/litellm-proxy-prometheus-k-alertmanager 9093:9093
+
+WARNING: There are "resources" sections in the chart not set. Using "resourcesPreset" is not recommended for production. For production installations, please set the following values according to your workload needs:
+  - alertmanager.resources
+  - blackboxExporter.resources
+  - operator.resources
+  - prometheus.resources
+  - prometheus.thanos.resources
++info https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/

@@ -1,0 +1,45 @@
+Release "litellm-proxy-redis" does not exist. Installing it now.
+NAME: litellm-proxy-redis
+LAST DEPLOYED: Thu Jul 17 21:21:09 2025
+NAMESPACE: redis
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CHART NAME: redis
+CHART VERSION: 21.2.12
+APP VERSION: 8.0.3
+
+Did you know there are enterprise versions of the Bitnami catalog? For enhanced secure software supply chain features, unlimited pulls from Docker, LTS support, or application customization, see Bitnami Premium or Tanzu Application Catalog. See https://www.arrow.com/globalecs/na/vendors/bitnami for more information.
+
+** Please be patient while the chart is being deployed **
+
+Redis&reg; can be accessed via port 6379 on the following DNS name from within your cluster:
+
+    litellm-proxy-redis-master.redis.svc.cluster.local
+
+
+
+To connect to your Redis&reg; server:
+
+1. Run a Redis&reg; pod that you can use as a client:
+
+   kubectl run --namespace redis redis-client --restart='Never'  --image docker.io/bitnami/redis:8.0.3-debian-12-r1 --command -- sleep infinity
+
+   Use the following command to attach to the pod:
+
+   kubectl exec --tty -i redis-client \
+   --namespace redis -- bash
+
+2. Connect using the Redis&reg; CLI:
+   redis-cli -h litellm-proxy-redis-master
+
+To connect to your database from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace redis svc/litellm-proxy-redis-master 6379:6379 &
+    redis-cli -h 127.0.0.1 -p 6379
+
+WARNING: There are "resources" sections in the chart not set. Using "resourcesPreset" is not recommended for production. For production installations, please set the following values according to your workload needs:
+  - replica.resources
+  - master.resources
++info https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/

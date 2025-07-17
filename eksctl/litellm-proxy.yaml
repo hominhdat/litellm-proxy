@@ -1,0 +1,52 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: eks-litellm-proxy
+  region: us-west-2
+  version: "1.32"
+
+iam:
+  withOIDC: true
+
+kubernetesNetworkConfig:
+  ipFamily: IPv4
+  serviceIPv4CIDR: 192.168.0.0/16
+
+vpc:
+  cidr: 10.0.0.0/16
+  clusterEndpoints:
+    privateAccess: true
+    publicAccess: true
+
+availabilityZones: [us-west-2a, us-west-2b, us-west-2c]
+
+managedNodeGroups:
+  - name: eks-ng-1-32
+    minSize: 0
+    maxSize: 5
+    desiredCapacity: 0
+    instanceType: t3a.xlarge
+    spot: true
+    volumeSize: 50
+    volumeType: gp3
+    labels: {}
+    privateNetworking: true
+    ssh:
+      allow: true
+      publicKeyPath: /Users/davidho/staple/ssh-keys/id_rsa.pub
+    tags:
+      environment: production
+      location: us-west-2
+    iam:
+      withAddonPolicies:
+        imageBuilder: true
+        externalDNS: true
+        certManager: true
+        albIngress: true
+        ebs: true
+        efs: true
+        awsLoadBalancerController: true
+        xRay: true
+        cloudWatch: true
+        appMesh: true
+        autoScaler: true

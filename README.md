@@ -6,25 +6,11 @@ Design and implement a production-ready AWS infrastructure for one of three appl
 
 ## Application Choices:
 
-Choose **ONE** of the following applications to deploy:
-
-#### Option 1: Twenty CRM
-- **Purpose**: Customer Relationship Management platform
-- **Technology**: React frontend, Node.js backend, PostgreSQL database
-- **Features**: Contact management, sales pipeline, analytics dashboard
-- **Complexity**: Medium (3 services: frontend, backend, database)
-
 #### Option 2: LiteLLM Proxy
 - **Purpose**: Unified API gateway for multiple LLM providers
 - **Technology**: Python FastAPI, PostgreSQL, Redis
 - **Features**: Model routing, cost tracking, rate limiting
 - **Complexity**: Medium (3 services: API, database, cache)
-
-#### Option 3: N8N
-- **Purpose**: Workflow automation platform
-- **Technology**: Node.js, PostgreSQL, Redis
-- **Features**: Visual workflow builder, 200+ integrations
-- **Complexity**: High (4 services: web, worker, database, cache)
 
 #### Cloud Infrastructure Architecture:
 ```mermaid
@@ -115,20 +101,10 @@ graph TB
 
 #### Application-Specific Infrastructure:
 
-##### For Twenty CRM:
-- **ECS Fargate**: Container orchestration for Twenty server and worker
-- **RDS PostgreSQL**: Database with basic security
-- **S3**: File storage for attachments and documents
-
 ##### For LiteLLM Proxy:
 - **ECS Fargate**: Container orchestration for LiteLLM proxy
 - **RDS PostgreSQL**: Database for user management and request logging
 - **ElastiCache Redis**: Caching layer for responses and sessions
-
-##### For N8N:
-- **ECS Fargate**: Container orchestration for N8N web and worker nodes
-- **RDS PostgreSQL**: Database for workflow storage and execution history
-- **ElastiCache Redis**: Caching and queue management
 
 ### Phase 2: DevOps & Security Implementation (1-2 days)
 
@@ -245,67 +221,6 @@ general_settings:
 
 litellm_settings:
   drop_params: true
-```
-
-#### N8N Configuration:
-```yaml
-# docker-compose.yml
-version: '3.8'
-services:
-  n8n:
-    image: n8nio/n8n:latest
-    environment:
-      - DB_TYPE=postgresdb
-      - DB_POSTGRESDB_HOST=postgres
-      - DB_POSTGRESDB_PORT=5432
-      - DB_POSTGRESDB_DATABASE=n8n
-      - DB_POSTGRESDB_USER=n8n
-      - DB_POSTGRESDB_PASSWORD=${DB_PASSWORD}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=${N8N_USER}
-      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
-    volumes:
-      - n8n_data:/home/node/.n8n
-    depends_on:
-      - postgres
-      - redis
-
-  n8n-worker:
-    image: n8nio/n8n:latest
-    environment:
-      - DB_TYPE=postgresdb
-      - DB_POSTGRESDB_HOST=postgres
-      - DB_POSTGRESDB_PORT=5432
-      - DB_POSTGRESDB_DATABASE=n8n
-      - DB_POSTGRESDB_USER=n8n
-      - DB_POSTGRESDB_PASSWORD=${DB_PASSWORD}
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - EXECUTIONS_MODE=worker
-    depends_on:
-      - postgres
-      - redis
-
-  postgres:
-    image: postgres:15
-    environment:
-      - POSTGRES_DB=n8n
-      - POSTGRES_USER=n8n
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - redis_data:/data
-
-volumes:
-  n8n_data:
-  postgres_data:
-  redis_data:
 ```
 
 ## Deliverables:

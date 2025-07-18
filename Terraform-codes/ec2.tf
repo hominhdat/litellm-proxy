@@ -15,20 +15,20 @@ resource "aws_key_pair" "jumphost" {
 
 # put key pair in the AWS parameters store
 resource "aws_ssm_parameter" "jumphost_keypair" {
-  name        = "/litellm/jumphost/keypair"
-  type        = "String"
-  value       = file("~/.ssh/id_rsa")
+  name  = "/litellm/jumphost/keypair"
+  type  = "String"
+  value = file("~/.ssh/id_rsa")
   tags = {
     Name = "litellm-jumphost-keypair"
   }
 }
 
 resource "aws_instance" "jumphost" {
-  ami           = data.aws_ami.amazon_linux_2.id
-  instance_type = "t2.micro"
-  subnet_id     = aws_subnet.public[0].id
+  ami                    = data.aws_ami.amazon_linux_2.id
+  instance_type          = "t2.micro"
+  subnet_id              = data.aws_subnets.SubnetPublicUSWEST2A.ids[0]
   vpc_security_group_ids = [aws_security_group.jumphost.id]
-  key_name      = aws_key_pair.jumphost.key_name
+  key_name               = aws_key_pair.jumphost.key_name
   tags = {
     Name = "litellm-jumphost"
   }

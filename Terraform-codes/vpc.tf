@@ -1,110 +1,77 @@
-resource "aws_vpc" "litellm-proxy-vpc" {
-  cidr_block = "10.0.0.0/16"
-  enable_dns_support = true
-  enable_dns_hostnames = true
-  tags = {
-    Name = "litellm-vpc"
-  }
-  lifecycle {
-    create_before_destroy = true
+data "aws_vpc" "litellm_vpc" {
+  filter {
+    name   = "tag:Name"
+    values = ["eksctl-eks-litellm-proxy-cluster/VPC"]
   }
 }
 
-# create 3 private subnets and 3 public subnets in vpc
-resource "aws_subnet" "private" {
-  count = 3
-  vpc_id = aws_vpc.litellm-proxy-vpc.id
-  cidr_block = cidrsubnet(aws_vpc.litellm-proxy-vpc.cidr_block, 8, count.index + 1)
-  availability_zone = element(data.aws_availability_zones.available.names, count.index)
-  map_public_ip_on_launch = false
-  tags = {
-    Name = "litellm-private-subnet-${count.index + 1}"
+data "aws_subnets" "SubnetPrivateUSWEST2A" {
+  filter {
+    name   = "tag:Name"
+    values = ["eksctl-eks-litellm-proxy-cluster/SubnetPrivateUSWEST2A"]
+  }
+}
+data "aws_subnets" "SubnetPrivateUSWEST2B" {
+  filter {
+    name   = "tag:Name"
+    values = ["eksctl-eks-litellm-proxy-cluster/SubnetPrivateUSWEST2B"]
+  }
+}
+data "aws_subnets" "SubnetPrivateUSWEST2C" {
+  filter {
+    name   = "tag:Name"
+    values = ["eksctl-eks-litellm-proxy-cluster/SubnetPrivateUSWEST2C"]
   }
 }
 
-resource "aws_subnet" "public" {
-  count = 3
-  vpc_id = aws_vpc.litellm-proxy-vpc.id
-  cidr_block = cidrsubnet(aws_vpc.litellm-proxy-vpc.cidr_block, 8, count.index + 4)
-  availability_zone = element(data.aws_availability_zones.available.names, count.index)
-  map_public_ip_on_launch = true
-  tags = {
-    Name = "litellm-public-subnet-${count.index + 1}"
-  }
-}
-data "aws_availability_zones" "available" {
-  state = "available"
-}
-resource "aws_internet_gateway" "default" {
-  vpc_id = aws_vpc.litellm-proxy-vpc.id
-  tags = {
-    Name = "litellm-internet-gateway"
-  }
-  lifecycle {
-    create_before_destroy = true
+data "aws_subnets" "SubnetPublicUSWEST2A" {
+  filter {
+    name   = "tag:Name"
+    values = ["eksctl-eks-litellm-proxy-cluster/SubnetPublicUSWEST2A"]
   }
 }
 
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.litellm-proxy-vpc.id
-  tags = {
-    Name = "litellm-public-route-table"
-  }
-  lifecycle {
-    create_before_destroy = true
+data "aws_subnets" "SubnetPublicUSWEST2B" {
+  filter {
+    name   = "tag:Name"
+    values = ["eksctl-eks-litellm-proxy-cluster/SubnetPublicUSWEST2B"]
   }
 }
 
-resource "aws_route" "public_internet_access" {
-  route_table_id = aws_route_table.public.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id = aws_internet_gateway.default.id
-}
-
-resource "aws_route_table_association" "public" {
-  count = length(aws_subnet.public)
-  subnet_id = aws_subnet.public[count.index].id
-  route_table_id = aws_route_table.public.id
-}
-
-resource "aws_route_table" "private" {
-  count = length(aws_subnet.private)
-  vpc_id = aws_vpc.litellm-proxy-vpc.id
-  tags = {
-    Name = "litellm-private-route-table"
+data "aws_subnets" "SubnetPublicUSWEST2C" {
+  filter {
+    name   = "tag:Name"
+    values = ["eksctl-eks-litellm-proxy-cluster/SubnetPublicUSWEST2C"]
   }
 }
 
-resource "aws_route_table_association" "private" {
-  count = length(aws_subnet.private)
-  subnet_id = aws_subnet.private[count.index].id
-  route_table_id = aws_route_table.private[count.index].id
+
+output "SubnetPrivateUSWEST2A" {
+  value = data.aws_subnets.SubnetPrivateUSWEST2A.ids
+
 }
 
-resource "aws_nat_gateway" "default" {
-  allocation_id = aws_eip.nat.id
-  subnet_id = aws_subnet.public[0].id
-  tags = {
-    Name = "litellm-nat-gateway"
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-resource "aws_eip" "nat" {
-  
-  tags = {
-    Name = "litellm-nat-eip"
-  }
-  lifecycle {
-    create_before_destroy = true
-  }
+output "SubnetPrivateUSWEST2B" {
+  value = data.aws_subnets.SubnetPrivateUSWEST2B.ids
+
 }
 
-# # route all private subnets to the NAT gateway
-resource "aws_route" "private_nat_gateway" {
-  count = length(aws_subnet.private)
-  route_table_id = aws_route_table.private[count.index].id
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id = aws_nat_gateway.default.id
+output "SubnetPrivateUSWEST2C" {
+  value = data.aws_subnets.SubnetPrivateUSWEST2C.ids
+
+}
+
+output "SubnetPublicUSWEST2A" {
+  value = data.aws_subnets.SubnetPublicUSWEST2A.ids
+
+}
+
+output "SubnetPublicUSWEST2B" {
+  value = data.aws_subnets.SubnetPublicUSWEST2B.ids
+
+}
+
+output "SubnetPublicUSWEST2C" {
+  value = data.aws_subnets.SubnetPublicUSWEST2C.ids
+
 }
